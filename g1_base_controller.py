@@ -21,25 +21,27 @@ class G1BaseController:
 
         # 키 매핑 테이블 
         self.joy_mapping = {
-            # ========== 기본 이동 (axes) ==========
+            # ========== 기본 이동 (axes) - 필수 ==========
             ('axes', 1, 1): ('Move Backward #s', lambda: self.sub_controller.move_backward()),
             ('axes', 1, -1): ('Move Forward #w', lambda: self.sub_controller.move_forward()),
             ('axes', 0, 1): ('Move Right #d', lambda: self.sub_controller.move_right()),
             ('axes', 0, -1): ('Move Left #a', lambda: self.sub_controller.move_left()),
             
-            # ========== 회전 및 정지 (buttons) ==========
+            # ========== 회전 및 정지 (buttons) - 필수 ==========
             ('buttons', 1, 1): ('Turn Right #e', lambda: self.sub_controller.turn_right()),
             ('buttons', 2, 1): ('Turn Left #q', lambda: self.sub_controller.turn_left()),
             ('buttons', 3, 1): ('Stop Motion #r', lambda: self.sub_controller.stop()),
             
-            # ========== 자세 제어 (buttons) ==========
+            # ========== 자세 제어 (buttons) - 필수 ==========
             ('buttons', 4, 1): ('Sit Down #z', lambda: self.sub_controller.sit_down()),
             ('buttons', 5, 1): ('Stand Up #c', lambda: self.sub_controller.stand_up()),
             ('buttons', 0, 1): ('Enable Motion #space', lambda: self.sub_controller.enable_motion()),
             
-            # ========== FSM 제어 (buttons) ==========
+            # ========== FSM 제어 (buttons) - 중요 ==========
             ('buttons', 6, 1): ('Set FSM ID 1 #1', lambda: self.sub_controller.set_fsm_id(1)),
             ('buttons', 7, 1): ('Set FSM ID 4 #3', lambda: self.sub_controller.set_fsm_id(4)),
+            
+            # ========== 모드 제어 (buttons) - 중요 ==========
             ('buttons', 8, 1): ('Set FSM ID 500 #6', lambda: self.sub_controller.set_fsm_id(500)),
             ('buttons', 9, 1): ('Set FSM ID 801 #7', lambda: self.sub_controller.set_fsm_id(801)),
             
@@ -54,6 +56,7 @@ class G1BaseController:
             ('axes', 2, -1): ('Arm Shake Hand #j', lambda: self.sub_controller.arm_shake_hand()),
             ('axes', 3, 1): ('Arm Face Wave #k', lambda: self.sub_controller.arm_action("face_wave")),
             ('axes', 3, -1): ('Arm X-Ray #i', lambda: self.sub_controller.arm_action("x_ray")),
+
 
             # ========== 아래는 사용 안 함 (주석 처리) ==========
             # # ========== 손 제어 (buttons) - loco 기능 ==========
@@ -81,6 +84,7 @@ class G1BaseController:
             # # ('buttons', 19, 1): ('Arm Right Heart', lambda: self.sub_controller.arm_right_heart()),
             # # ('buttons', 20, 1): ('Arm Right Hand Up', lambda: self.sub_controller.arm_right_hand_up()),
             # # ('buttons', 21, 1): ('Arm Release', lambda: self.sub_controller.arm_release()),
+
         }
 
         print(f"[INFO] G1BaseController initialized with {len(self.joy_mapping)} key mappings")
