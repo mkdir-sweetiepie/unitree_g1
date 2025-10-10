@@ -129,6 +129,43 @@ g1_loco_wrapper/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_loco_wrapper.dir/build.make CMakeFiles/g1_loco_wrapper.dir/build
 .PHONY : g1_loco_wrapper/fast
 
+#=============================================================================
+# Target rules for targets named g1_arm_wrapper
+
+# Build rule for target.
+g1_arm_wrapper: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 g1_arm_wrapper
+.PHONY : g1_arm_wrapper
+
+# fast build rule for target.
+g1_arm_wrapper/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/build
+.PHONY : g1_arm_wrapper/fast
+
+g1_arm_wrapper.o: g1_arm_wrapper.cpp.o
+.PHONY : g1_arm_wrapper.o
+
+# target to build an object file
+g1_arm_wrapper.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/g1_arm_wrapper.cpp.o
+.PHONY : g1_arm_wrapper.cpp.o
+
+g1_arm_wrapper.i: g1_arm_wrapper.cpp.i
+.PHONY : g1_arm_wrapper.i
+
+# target to preprocess a source file
+g1_arm_wrapper.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/g1_arm_wrapper.cpp.i
+.PHONY : g1_arm_wrapper.cpp.i
+
+g1_arm_wrapper.s: g1_arm_wrapper.cpp.s
+.PHONY : g1_arm_wrapper.s
+
+# target to generate assembly for a file
+g1_arm_wrapper.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/g1_arm_wrapper.cpp.s
+.PHONY : g1_arm_wrapper.cpp.s
+
 g1_loco_wrapper.o: g1_loco_wrapper.cpp.o
 .PHONY : g1_loco_wrapper.o
 
@@ -161,7 +198,11 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
+	@echo "... g1_arm_wrapper"
 	@echo "... g1_loco_wrapper"
+	@echo "... g1_arm_wrapper.o"
+	@echo "... g1_arm_wrapper.i"
+	@echo "... g1_arm_wrapper.s"
 	@echo "... g1_loco_wrapper.o"
 	@echo "... g1_loco_wrapper.i"
 	@echo "... g1_loco_wrapper.s"

@@ -19,7 +19,7 @@ class G1BaseController:
             self.sub_controller.base_controller = self
         pub.subscribe(self.receive_message, "receive_message")
 
-        # 키 매핑 테이블 - 필수 기능 우선 배치
+        # 키 매핑 테이블 
         self.joy_mapping = {
             # ========== 기본 이동 (axes) ==========
             ('axes', 1, 1): ('Move Backward #s', lambda: self.sub_controller.move_backward()),
@@ -43,40 +43,49 @@ class G1BaseController:
             ('buttons', 8, 1): ('Set FSM ID 500 #6', lambda: self.sub_controller.set_fsm_id(500)),
             ('buttons', 9, 1): ('Set FSM ID 801 #7', lambda: self.sub_controller.set_fsm_id(801)),
             
-            # ========== 손 제어 (buttons) - 중요 ==========
-            ('buttons', 10, 1): ('Wave Hand #h', lambda: self.sub_controller.wave_hand()),
-            ('buttons', 11, 1): ('Shake Hand #j', lambda: self.sub_controller.shake_hand()),
+            # ========== ARM 상체 제어 (buttons 10-15) ==========
+            ('buttons', 10, 1): ('Arm Wave #9', lambda: self.sub_controller.arm_wave()),
+            ('buttons', 11, 1): ('Arm Clap #10', lambda: self.sub_controller.arm_clap()),
+            ('buttons', 12, 1): ('Arm Heart #위', lambda: self.sub_controller.arm_heart()),
+            ('buttons', 13, 1): ('Arm Hug #아래', lambda: self.sub_controller.arm_hug()),
+            ('buttons', 14, 1): ('Arm Hands Up #왼쪽', lambda: self.sub_controller.arm_hands_up()),
+            ('buttons', 15, 1): ('Arm High Five #오른쪽', lambda: self.sub_controller.arm_high_five()),
+            ('axes', 2, 1): ('Arm Reject #l', lambda: self.sub_controller.arm_reject()),
+            ('axes', 2, -1): ('Arm Shake Hand #j', lambda: self.sub_controller.arm_shake_hand()),
+            ('axes', 3, 1): ('Arm Face Wave #k', lambda: self.sub_controller.arm_action("face_wave")),
+            ('axes', 3, -1): ('Arm X-Ray #i', lambda: self.sub_controller.arm_action("x_ray")),
 
-            # ========== 안전 제어 (buttons) - 중요 ==========
-            ('buttons', 12, 1): ('Damp Mode #위', lambda: self.sub_controller.damp()),
-            ('buttons', 13, 1): ('Zero Torque #아래', lambda: self.sub_controller.zero_torque()),
-            
-            # ========== 고급 자세 (buttons) - 유용 ==========
-            ('buttons', 14, 1): ('Squat #왼쪽', lambda: self.sub_controller.squat()),
-            ('buttons', 15, 1): ('Balance Stand #오른쪽', lambda: self.sub_controller.balance_stand()),
-            
-            # ========== 추가 제어 (axes 활용) - 고급 ==========
-            ('axes', 2, 1): ('Switch Move Mode ON', lambda: self.sub_controller.switch_move_mode(True)),
-            ('axes', 2, -1): ('Switch Move Mode OFF', lambda: self.sub_controller.switch_move_mode(False)),
-            ('axes', 3, 1): ('High Stand', lambda: self.sub_controller.high_stand()),
-            ('axes', 3, -1): ('Low Stand', lambda: self.sub_controller.low_stand()),
+            # ========== 아래는 사용 안 함 (주석 처리) ==========
+            # # ========== 손 제어 (buttons) - loco 기능 ==========
+            # # ('buttons', 10, 1): ('Wave Hand #h', lambda: self.sub_controller.wave_hand()),
+            # # ('buttons', 11, 1): ('Shake Hand #j', lambda: self.sub_controller.shake_hand()),
+
+            # # ========== 안전 제어 (buttons) ==========
+            # # ('buttons', 12, 1): ('Damp Mode', lambda: self.sub_controller.damp()),
+            # # ('buttons', 13, 1): ('Zero Torque', lambda: self.sub_controller.zero_torque()),
+
+            # # ========== 고급 자세 (buttons) ==========
+            # # ('buttons', 14, 1): ('Squat', lambda: self.sub_controller.squat()),
+            # # ('buttons', 15, 1): ('Balance Stand', lambda: self.sub_controller.balance_stand()),
+
+            # # ========== 추가 제어 (axes 활용) - loco 기능 ==========
+            # # ('axes', 2, 1): ('Switch Move Mode ON', lambda: self.sub_controller.switch_move_mode(True)),
+            # # ('axes', 2, -1): ('Switch Move Mode OFF', lambda: self.sub_controller.switch_move_mode(False)),
+            # # ('axes', 3, 1): ('High Stand', lambda: self.sub_controller.high_stand()),
+            # # ('axes', 3, -1): ('Low Stand', lambda: self.sub_controller.low_stand()),
+
+            # # ========== ARM 추가 액션 (코드로만 사용 가능) ==========
+            # # ('buttons', 16, 1): ('Arm Two Hand Kiss', lambda: self.sub_controller.arm_two_hand_kiss()),
+            # # ('buttons', 17, 1): ('Arm Left Kiss', lambda: self.sub_controller.arm_left_kiss()),
+            # # ('buttons', 18, 1): ('Arm Right Kiss', lambda: self.sub_controller.arm_right_kiss()),
+            # # ('buttons', 19, 1): ('Arm Right Heart', lambda: self.sub_controller.arm_right_heart()),
+            # # ('buttons', 20, 1): ('Arm Right Hand Up', lambda: self.sub_controller.arm_right_hand_up()),
+            # # ('buttons', 21, 1): ('Arm Release', lambda: self.sub_controller.arm_release()),
         }
 
         print(f"[INFO] G1BaseController initialized with {len(self.joy_mapping)} key mappings")
 
-    def receive_message(self, message):tons', 9, 1): ('Set FSM ID 801 #7', lambda: self.sub_controller.set_fsm_id(801)),
-            
-            # ========== 손 제어 (buttons) - 중요 ==========
-            ('buttons', 10, 1): ('Wave Hand #h', lambda: self.sub_controller.wave_hand()),
-            ('buttons', 11, 1): ('Shake Hand #j', lambda: self.sub_controller.shake_hand()),
-
-            # ========== 안전 제어 (buttons) - 중요 ==========
-            ('buttons', 12, 1): ('Damp Mode', lambda: self.sub_controller.damp()),
-            ('buttons', 13, 1): ('Zero Torque', lambda: self.sub_controller.zero_torque()),
-            
-            # ========== 고급 자세 (buttons) - 유용 ==========
-            ('buttons', 14, 1): ('Squat', lambda: self.sub_controller.squat()),
-            ('buttons', 15, 1): ('Balance Stand', lambda: self.sub_controller.balance_stand()),
+    def receive_message(self, message):
         if 'topic' in message:
             topic = message['topic']
             value = message['value']
@@ -143,7 +152,7 @@ class G1BaseController:
         if self.sub_controller:
             self.sub_controller.connect()
             
-            # StatusManager 초기화 (gerri 시스템 연동)
+            # StatusManager 초기화
             try:
                 self.status_manager = StatusManager(self.robot_info, self.sub_controller)
                 print("[SUCCESS] StatusManager initialized")

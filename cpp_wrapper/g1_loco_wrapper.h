@@ -16,12 +16,6 @@ typedef struct {
     float value;
 } FloatResult;
 
-typedef struct {
-    int code;
-    float* data;
-    int size;
-} VectorResult;
-
 // 클래스 포인터 타입 (opaque pointer)
 typedef void* LocoClientHandle;
 
@@ -37,7 +31,6 @@ IntResult get_fsm_mode(LocoClientHandle handle);
 IntResult get_balance_mode(LocoClientHandle handle);
 FloatResult get_swing_height(LocoClientHandle handle);
 FloatResult get_stand_height(LocoClientHandle handle);
-VectorResult get_phase(LocoClientHandle handle);
 
 // SET 함수들
 int set_fsm_id(LocoClientHandle handle, int fsm_id);
@@ -64,9 +57,6 @@ int switch_move_mode(LocoClientHandle handle, int flag);
 int move_robot(LocoClientHandle handle, float vx, float vy, float vyaw);
 int wave_hand(LocoClientHandle handle, int turn_flag);
 int shake_hand(LocoClientHandle handle, int stage);
-
-// 메모리 해제 함수
-void free_vector_result(VectorResult result);
 
 #ifdef __cplusplus
 }

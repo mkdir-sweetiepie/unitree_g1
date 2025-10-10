@@ -221,6 +221,9 @@ UNITREE_SDK_INCLUDE_DIR:PATH=/home/tom2025orin006/dev/unitree_sdk2/include
 //Path to a library.
 UNITREE_SDK_LIB:FILEPATH=/home/tom2025orin006/dev/unitree_sdk2/lib/aarch64/libunitree_sdk2.a
 
+//Dependencies for the target
+g1_arm_wrapper_LIB_DEPENDS:STATIC=general;/home/tom2025orin006/dev/unitree_sdk2/lib/aarch64/libunitree_sdk2.a;general;/home/tom2025orin006/dev/unitree_sdk2/thirdparty/lib/aarch64/libddsc.so;general;/home/tom2025orin006/dev/unitree_sdk2/thirdparty/lib/aarch64/libddscxx.so;
+
 //Value Computed by CMake
 g1_loco_wrapper_BINARY_DIR:STATIC=/home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitree_g1/cpp_wrapper/build
 

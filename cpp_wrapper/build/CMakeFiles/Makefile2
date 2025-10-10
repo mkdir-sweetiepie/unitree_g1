@@ -64,6 +64,7 @@ CMAKE_BINARY_DIR = /home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitr
 
 # The main recursive "all" target.
 all: CMakeFiles/g1_loco_wrapper.dir/all
+all: CMakeFiles/g1_arm_wrapper.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,6 +73,7 @@ preinstall:
 
 # The main recursive "clean" target.
 clean: CMakeFiles/g1_loco_wrapper.dir/clean
+clean: CMakeFiles/g1_arm_wrapper.dir/clean
 .PHONY : clean
 
 #=============================================================================
@@ -81,7 +83,7 @@ clean: CMakeFiles/g1_loco_wrapper.dir/clean
 CMakeFiles/g1_loco_wrapper.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_loco_wrapper.dir/build.make CMakeFiles/g1_loco_wrapper.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_loco_wrapper.dir/build.make CMakeFiles/g1_loco_wrapper.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitree_g1/cpp_wrapper/build/CMakeFiles --progress-num=1,2 "Built target g1_loco_wrapper"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitree_g1/cpp_wrapper/build/CMakeFiles --progress-num=3,4 "Built target g1_loco_wrapper"
 .PHONY : CMakeFiles/g1_loco_wrapper.dir/all
 
 # Build rule for subdir invocation for target.
@@ -99,6 +101,32 @@ g1_loco_wrapper: CMakeFiles/g1_loco_wrapper.dir/rule
 CMakeFiles/g1_loco_wrapper.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_loco_wrapper.dir/build.make CMakeFiles/g1_loco_wrapper.dir/clean
 .PHONY : CMakeFiles/g1_loco_wrapper.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/g1_arm_wrapper.dir
+
+# All Build rule for target.
+CMakeFiles/g1_arm_wrapper.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitree_g1/cpp_wrapper/build/CMakeFiles --progress-num=1,2 "Built target g1_arm_wrapper"
+.PHONY : CMakeFiles/g1_arm_wrapper.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/g1_arm_wrapper.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitree_g1/cpp_wrapper/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/g1_arm_wrapper.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/tom2025orin006/dev/and_gerri/gerri/robot/examples/unitree_g1/cpp_wrapper/build/CMakeFiles 0
+.PHONY : CMakeFiles/g1_arm_wrapper.dir/rule
+
+# Convenience name for target.
+g1_arm_wrapper: CMakeFiles/g1_arm_wrapper.dir/rule
+.PHONY : g1_arm_wrapper
+
+# clean rule for target.
+CMakeFiles/g1_arm_wrapper.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/g1_arm_wrapper.dir/build.make CMakeFiles/g1_arm_wrapper.dir/clean
+.PHONY : CMakeFiles/g1_arm_wrapper.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

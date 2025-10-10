@@ -40,14 +40,19 @@ include_directories(${UNITREE_SDK_INCLUDE_DIR})
 include_directories(${UNITREE_SDK_PATH}/thirdparty/include)
 include_directories(${UNITREE_SDK_PATH}/thirdparty/include/ddscxx)
 
-# Add shared library
+# Add shared libraries
 add_library(g1_loco_wrapper SHARED g1_loco_wrapper.cpp)
+add_library(g1_arm_wrapper SHARED g1_arm_wrapper.cpp)
 
 # Link libraries
 target_link_libraries(g1_loco_wrapper ${UNITREE_SDK_LIB} ${DDSC_LIB} ${DDSCXX_LIB})
+target_link_libraries(g1_arm_wrapper ${UNITREE_SDK_LIB} ${DDSC_LIB} ${DDSCXX_LIB})
 
 # Set output directory to parent directory
 set_target_properties(g1_loco_wrapper PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/..
+)
+set_target_properties(g1_arm_wrapper PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/..
 )
 

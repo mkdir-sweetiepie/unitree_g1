@@ -13,7 +13,6 @@ class G1LocoClientWrapper {
 public:
     unitree::robot::g1::LocoClient client;
     bool continous_move_ = false;
-    bool first_shake_hand_stage_ = true;
 
     G1LocoClientWrapper() {
         // Constructor
@@ -150,7 +149,7 @@ FloatResult get_swing_height(LocoClientHandle handle) {
 FloatResult get_stand_height(LocoClientHandle handle) {
     FloatResult result = {-1, 0.0f};
     if (!handle) return result;
-    
+
     try {
         G1LocoClientWrapper* wrapper = static_cast<G1LocoClientWrapper*>(handle);
         float stand_height = 0.0f;
@@ -160,41 +159,6 @@ FloatResult get_stand_height(LocoClientHandle handle) {
     } catch (const std::exception& e) {
         std::cerr << "Error getting stand height: " << e.what() << std::endl;
         result.code = -1;
-    }
-    return result;
-}
-
-VectorResult get_phase(LocoClientHandle handle) {
-    VectorResult result = {-1, nullptr, 0};
-    if (!handle) return result;
-
-    try {
-        G1LocoClientWrapper* wrapper = static_cast<G1LocoClientWrapper*>(handle);
-        std::vector<float> phase;
-
-        // 예제와 동일한 방식으로 호출
-        int32_t ret = wrapper->client.GetPhase(phase);
-
-        result.code = ret;
-        if (ret == 0 && phase.size() > 0) {
-            result.size = phase.size();
-            // 안전한 메모리 할당
-            result.data = static_cast<float*>(malloc(phase.size() * sizeof(float)));
-            if (result.data) {
-                // 데이터 복사
-                for (size_t i = 0; i < phase.size(); ++i) {
-                    result.data[i] = phase[i];
-                }
-            } else {
-                result.code = -1;
-                result.size = 0;
-            }
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error getting phase: " << e.what() << std::endl;
-        result.code = -1;
-        result.size = 0;
-        result.data = nullptr;
     }
     return result;
 }
@@ -456,20 +420,13 @@ int wave_hand(LocoClientHandle handle, int turn_flag) {
 
 int shake_hand(LocoClientHandle handle, int stage) {
     if (!handle) return -1;
-    
+
     try {
         G1LocoClientWrapper* wrapper = static_cast<G1LocoClientWrapper*>(handle);
         return wrapper->client.ShakeHand(stage);
     } catch (const std::exception& e) {
         std::cerr << "Error shaking hand: " << e.what() << std::endl;
         return -1;
-    }
-}
-
-// 메모리 해제 함수
-void free_vector_result(VectorResult result) {
-    if (result.data) {
-        free(result.data);
     }
 }
 

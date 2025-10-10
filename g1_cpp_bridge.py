@@ -15,9 +15,6 @@ class IntResult(Structure):
 class FloatResult(Structure):
     _fields_ = [("code", c_int), ("value", c_float)]
 
-class VectorResult(Structure):
-    _fields_ = [("code", c_int), ("data", POINTER(c_float)), ("size", c_int)]
-
 class G1CppBridge:
     """G1 LocoClient C++ Wrapper Bridge for Python"""
     
@@ -152,23 +149,17 @@ class G1CppBridge:
                 print(f"[INFO] Connecting to G1 robot via {self.network_interface}")
                 interface_bytes = self.network_interface.encode('utf-8')
 
-                print("[DEBUG] Creating loco client...")
                 self.handle = self.lib.create_loco_client(interface_bytes)
                 if not self.handle:
                     raise RuntimeError("Failed to create loco client")
-                print(f"[DEBUG] Loco client created successfully: {self.handle}")
 
-                print("[DEBUG] Initializing loco client...")
                 result = self.lib.init_loco_client(self.handle)
                 if result != 0:
                     error_msg = self._get_error_message(result)
                     raise RuntimeError(f"Client initialization failed - Code: {result}, Message: {error_msg}")
-                print("[DEBUG] Loco client initialized successfully")
 
-                print("[DEBUG] Setting timeout...")
-                timeout_result = self.lib.set_timeout(self.handle, 3.0)
-                print(f"[DEBUG] Timeout set result: {timeout_result}")
-                
+                self.lib.set_timeout(self.handle, 3.0)
+
                 print(f"[SUCCESS] Connected to G1 robot via {self.network_interface}")
                 return True
 
@@ -219,18 +210,7 @@ class G1CppBridge:
         """FSM ID 조회"""
         self._check_connection()
         try:
-            print("[DEBUG] Calling get_fsm_id...")
             result = self.lib.get_fsm_id(self.handle)
-            print(f"[DEBUG] FSM result - code: {result.code}, value: {result.value}")
-            
-            # ROBOT_NOT_READY (3104) 상태에서도 값을 반환 (SDK 예제와 동일)
-            if result.code == 3104:
-                print(f"[INFO] Robot not ready, but returning value: {result.value}")
-                return 0, result.value  # 성공 코드로 반환
-            elif result.code != 0:
-                error_msg = self._get_error_message(result.code)
-                print(f"[WARNING] FSM ID query failed - Code: {result.code}, Message: {error_msg}")
-            
             return result.code, result.value
         except Exception as e:
             print(f"[ERROR] Exception in get_fsm_id: {e}")
@@ -240,36 +220,24 @@ class G1CppBridge:
         """FSM 모드 조회"""
         self._check_connection()
         result = self.lib.get_fsm_mode(self.handle)
-        # ROBOT_NOT_READY (3104) 상태에서도 값을 반환
-        if result.code == 3104:
-            return 0, result.value
         return result.code, result.value
     
     def get_balance_mode(self) -> Tuple[int, int]:
         """밸런스 모드 조회"""
         self._check_connection()
         result = self.lib.get_balance_mode(self.handle)
-        # ROBOT_NOT_READY (3104) 상태에서도 값을 반환
-        if result.code == 3104:
-            return 0, result.value
         return result.code, result.value
     
     def get_swing_height(self) -> Tuple[int, float]:
         """스윙 높이 조회"""
         self._check_connection()
         result = self.lib.get_swing_height(self.handle)
-        # ROBOT_NOT_READY (3104) 상태에서도 값을 반환
-        if result.code == 3104:
-            return 0, result.value
         return result.code, result.value
     
     def get_stand_height(self) -> Tuple[int, float]:
         """서있는 높이 조회"""
         self._check_connection()
         result = self.lib.get_stand_height(self.handle)
-        # ROBOT_NOT_READY (3104) 상태에서도 값을 반환
-        if result.code == 3104:
-            return 0, result.value
         return result.code, result.value
     
     # ========== SET 메소드들 ==========
