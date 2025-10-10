@@ -18,7 +18,7 @@ import traceback
 # C++ Bridge 로드
 try:
     print("[INFO] Loading C++ Bridges...")
-    from g1_cpp_bridge import G1CppBridge
+    from g1_loco_bridge import G1LocoBridge
     LOCO_BRIDGE_AVAILABLE = True
     print("[SUCCESS] Loco Bridge loaded successfully")
 except Exception as e:
@@ -88,7 +88,7 @@ class G1SubController:
 
         try:
             print("[INFO] Initializing Loco Bridge...")
-            self.loco_bridge = G1CppBridge(network_interface)
+            self.loco_bridge = G1LocoBridge(network_interface)
 
             if self.loco_bridge.connect():
                 print("[SUCCESS] Loco Bridge connected")

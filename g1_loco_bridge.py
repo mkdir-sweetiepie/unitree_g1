@@ -15,7 +15,7 @@ class IntResult(Structure):
 class FloatResult(Structure):
     _fields_ = [("code", c_int), ("value", c_float)]
 
-class G1CppBridge:
+class G1LocoBridge:
     """G1 LocoClient C++ Wrapper Bridge for Python"""
     
     def __init__(self, network_interface: str = "eth0"):

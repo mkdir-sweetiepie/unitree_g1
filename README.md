@@ -50,7 +50,7 @@ Unitree G1 humanoid robot의 하체(loco)와 상체(arm)를 독립적으로 제�
 └─────────────────┬──────────────────┬────────────────────────┘
                   │                  │
          ┌────────▼────────┐  ┌──────▼──────────┐
-         │  G1CppBridge    │  │  G1ArmBridge    │
+         │  G1LocoBridge   │  │  G1ArmBridge    │
          │  (Loco 제어)     │  │  (Arm 제어)      │
          └────────┬────────┘  └──────┬──────────┘
                   │ ctypes           │ ctypes
@@ -159,7 +159,7 @@ unitree_g1/
 ├── g1_config.py                 # 설정 파일
 ├── g1_base_controller.py        # 상위 컨트롤러 (메시지 라우팅, 조이스틱 매핑)
 ├── g1_sub_controller.py         # 하위 컨트롤러 (통합 loco + arm 제어)
-├── g1_cpp_bridge.py             # Loco Python-C++ 브릿지
+├── g1_loco_bridge.py            # Loco Python-C++ 브릿지
 ├── g1_arm_bridge.py             # Arm Python-C++ 브릿지
 └── cpp_wrapper/
     ├── CMakeLists.txt           # CMake 빌드 설정
@@ -179,7 +179,7 @@ unitree_g1/
 | `g1_config.py` | 설정 관리 | 로봇 정보, 카메라, 오디오 설정 |
 | `g1_base_controller.py` | 메시지 처리 | 조이스틱 입력 매핑 (loco + arm), 메시지 라우팅 |
 | `g1_sub_controller.py` | 통합 로봇 제어 | 이동, 자세, 16개 arm actions 제어 API |
-| `g1_cpp_bridge.py` | Loco 브릿지 | Python ctypes를 통한 loco C++ 호출 |
+| `g1_loco_bridge.py` | Loco 브릿지 | Python ctypes를 통한 loco C++ 호출 |
 | `g1_arm_bridge.py` | Arm 브릿지 | Python ctypes를 통한 arm C++ 호출 |
 | `g1_loco_wrapper.cpp` | Loco SDK 래퍼 | Unitree Loco SDK를 C 인터페이스로 래핑 |
 | `g1_arm_wrapper.cpp` | Arm SDK 래퍼 | Unitree Arm SDK를 C 인터페이스로 래핑 |
@@ -705,7 +705,7 @@ set(ARCH "aarch64")  # 또는 "x86_64"
 
 ```python
 # ✅ 올바른 순서
-self.loco_bridge = G1CppBridge("eth0")
+self.loco_bridge = G1LocoBridge("eth0")
 self.loco_bridge.connect()  # ChannelFactory 초기화
 
 self.arm_bridge = G1ArmBridge("eth0")
@@ -715,7 +715,7 @@ self.arm_bridge.connect()   # 기존 ChannelFactory 사용
 self.arm_bridge = G1ArmBridge("eth0")
 self.arm_bridge.connect()   # ChannelFactory 초기화 안 됨!
 
-self.loco_bridge = G1CppBridge("eth0")
+self.loco_bridge = G1LocoBridge("eth0")
 self.loco_bridge.connect()  # 에러 발생 가능
 ```
 
