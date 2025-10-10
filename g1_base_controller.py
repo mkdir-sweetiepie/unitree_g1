@@ -21,50 +21,29 @@ class G1BaseController:
 
         # 키 매핑 테이블 - 필수 기능 우선 배치
         self.joy_mapping = {
-            # ========== 기본 이동 (axes) ==========
+            # ========== 기본 이동 (axes) - 필수 ==========
             ('axes', 1, 1): ('Move Backward #s', lambda: self.sub_controller.move_backward()),
             ('axes', 1, -1): ('Move Forward #w', lambda: self.sub_controller.move_forward()),
             ('axes', 0, 1): ('Move Right #d', lambda: self.sub_controller.move_right()),
             ('axes', 0, -1): ('Move Left #a', lambda: self.sub_controller.move_left()),
             
-            # ========== 회전 및 정지 (buttons) ==========
+            # ========== 회전 및 정지 (buttons) - 필수 ==========
             ('buttons', 1, 1): ('Turn Right #e', lambda: self.sub_controller.turn_right()),
             ('buttons', 2, 1): ('Turn Left #q', lambda: self.sub_controller.turn_left()),
             ('buttons', 3, 1): ('Stop Motion #r', lambda: self.sub_controller.stop()),
             
-            # ========== 자세 제어 (buttons) ==========
+            # ========== 자세 제어 (buttons) - 필수 ==========
             ('buttons', 4, 1): ('Sit Down #z', lambda: self.sub_controller.sit_down()),
             ('buttons', 5, 1): ('Stand Up #c', lambda: self.sub_controller.stand_up()),
             ('buttons', 0, 1): ('Enable Motion #space', lambda: self.sub_controller.enable_motion()),
             
-            # ========== FSM 제어 (buttons) ==========
+            # ========== FSM 제어 (buttons) - 중요 ==========
             ('buttons', 6, 1): ('Set FSM ID 1 #1', lambda: self.sub_controller.set_fsm_id(1)),
             ('buttons', 7, 1): ('Set FSM ID 4 #3', lambda: self.sub_controller.set_fsm_id(4)),
+            
+            # ========== 모드 제어 (buttons) - 중요 ==========
             ('buttons', 8, 1): ('Set FSM ID 500 #6', lambda: self.sub_controller.set_fsm_id(500)),
             ('buttons', 9, 1): ('Set FSM ID 801 #7', lambda: self.sub_controller.set_fsm_id(801)),
-            
-            # ========== 손 제어 (buttons) - 중요 ==========
-            ('buttons', 10, 1): ('Wave Hand #h', lambda: self.sub_controller.wave_hand()),
-            ('buttons', 11, 1): ('Shake Hand #j', lambda: self.sub_controller.shake_hand()),
-
-            # ========== 안전 제어 (buttons) - 중요 ==========
-            ('buttons', 12, 1): ('Damp Mode #위', lambda: self.sub_controller.damp()),
-            ('buttons', 13, 1): ('Zero Torque #아래', lambda: self.sub_controller.zero_torque()),
-            
-            # ========== 고급 자세 (buttons) - 유용 ==========
-            ('buttons', 14, 1): ('Squat #왼쪽', lambda: self.sub_controller.squat()),
-            ('buttons', 15, 1): ('Balance Stand #오른쪽', lambda: self.sub_controller.balance_stand()),
-            
-            # ========== 추가 제어 (axes 활용) - 고급 ==========
-            ('axes', 2, 1): ('Switch Move Mode ON', lambda: self.sub_controller.switch_move_mode(True)),
-            ('axes', 2, -1): ('Switch Move Mode OFF', lambda: self.sub_controller.switch_move_mode(False)),
-            ('axes', 3, 1): ('High Stand', lambda: self.sub_controller.high_stand()),
-            ('axes', 3, -1): ('Low Stand', lambda: self.sub_controller.low_stand()),
-        }
-
-        print(f"[INFO] G1BaseController initialized with {len(self.joy_mapping)} key mappings")
-
-    def receive_message(self, message):tons', 9, 1): ('Set FSM ID 801 #7', lambda: self.sub_controller.set_fsm_id(801)),
             
             # ========== 손 제어 (buttons) - 중요 ==========
             ('buttons', 10, 1): ('Wave Hand #h', lambda: self.sub_controller.wave_hand()),
@@ -77,6 +56,17 @@ class G1BaseController:
             # ========== 고급 자세 (buttons) - 유용 ==========
             ('buttons', 14, 1): ('Squat', lambda: self.sub_controller.squat()),
             ('buttons', 15, 1): ('Balance Stand', lambda: self.sub_controller.balance_stand()),
+            
+            # ========== 추가 제어 (axes 활용) - 고급 ==========
+            ('axes', 2, 1): ('Switch Move Mode ON', lambda: self.sub_controller.switch_move_mode(True)),
+            ('axes', 2, -1): ('Switch Move Mode OFF', lambda: self.sub_controller.switch_move_mode(False)),
+            ('axes', 3, 1): ('High Stand', lambda: self.sub_controller.high_stand()),
+            ('axes', 3, -1): ('Low Stand', lambda: self.sub_controller.low_stand()),
+        }
+
+        print(f"[INFO] G1BaseController initialized with {len(self.joy_mapping)} key mappings")
+
+    def receive_message(self, message):
         if 'topic' in message:
             topic = message['topic']
             value = message['value']
