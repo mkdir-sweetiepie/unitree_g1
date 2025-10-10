@@ -105,7 +105,8 @@ Unitree SDK의 **ChannelFactory**는 싱글톤으로 구현되어 있습니다:
 
 ```bash
 # SDK 다운로드
-cd /home/tom2025orin006/dev
+mkdir ~/dev
+cd ~/dev
 git clone https://github.com/unitreerobotics/unitree_sdk2.git
 
 # SDK 빌드
@@ -118,8 +119,11 @@ make -j$(nproc)
 ### 3. Python 의존성 설치
 
 ```bash
-pip install pypubsub
-# AND (Adaptive Network Daemon) 설치 필요
+cd ~/dev
+git clone https://github.com/keti-ai/and_gerri.git # NEED ID and TOKEN
+cd and_gerri
+sudo chmod 777 install.sh
+bash install.sh
 ```
 
 ### 4. 환경 변수 설정

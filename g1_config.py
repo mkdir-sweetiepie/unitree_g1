@@ -16,7 +16,7 @@ VIDEO_INFO = {
 
 # Audio I/O devices
 AUDIO_INFO = {
-    # "audio": {"input": "NM-CSP01", "output": "NM-CSP01"},
+    #"audio": {"input": "NM-CSP01", "output": "NM-CSP01"},
     "audio": {"input": "default", "output": "default"},
 }
 

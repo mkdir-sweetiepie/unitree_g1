@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 import os
 import ctypes
 from ctypes import Structure, POINTER, c_void_p, c_int, c_float, c_char_p
@@ -279,7 +282,7 @@ if __name__ == "__main__":
     time.sleep(3)
     
     # 여러 action 순차 실행
-    actions = ["wave_hand", "heart", "reject"]
+    actions = ["face_wave", "heart", "reject"]
     for action in actions:
         print(f"\nExecuting '{action}'...")
         success, msg = bridge.execute_action_by_name(action)
