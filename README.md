@@ -1,30 +1,29 @@
-# Unitree G1 Robot Controller - 완전 통합 가이드
+# Unitree G1 Robot Controller - Complete Integration Guide
 
-Unitree G1 humanoid robot의 하체(loco)와 상체(arm)를 독립적으로 제어하는 통합 컨트롤러입니다. WebRTC 기반 실시간 통신(AND)과 로봇 제어 시스템(GERRI)을 결합하여 안정적인 원격 제어를 제공합니다.
+An integrated controller for independently controlling the lower body (loco) and upper body (arm) of the Unitree G1 humanoid robot. It combines WebRTC-based real-time communication (AND) with the robot control system (GERRI) to provide reliable remote control.
 
-**최종 업데이트**: 2025-10-10
-**상태**: Loco + Arm 통합 완료
-
----
-
-## 목차
-
-1. [시스템 개요](#-시스템-개요)
-2. [설치 방법](#-설치-방법)
-3. [파일 구조](#-파일-구조)
-4. [제어 기능](#-제어-기능)
-5. [Arm Actions 완전 가이드](#-arm-actions-완전-가이드)
-6. [사용 방법](#-사용-방법)
-7. [빌드 가이드](#-빌드-가이드)
-8. [문제 해결](#-문제-해결)
-9. [참고 자료](#-참고-자료)
+**Last Updated**: 2025-10-10
+**Status**: Loco + Arm Integration Complete
 
 ---
 
-## 시스템 개요
+## Table of Contents
 
-### 아키텍처
+1. [System Overview](#-system-overview)
+2. [Installation](#-installation)
+3. [File Structure](#-file-structure)
+4. [Control Features](#-control-features)
+5. [Arm Actions Complete Guide](#-arm-actions-complete-guide)
+6. [Usage](#-usage)
+7. [Build Guide](#-build-guide)
+8. [Troubleshooting](#-troubleshooting)
+9. [References](#-references)
 
+---
+
+## System Overview
+
+### Architecture
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Remote Client                          │
@@ -51,7 +50,7 @@ Unitree G1 humanoid robot의 하체(loco)와 상체(arm)를 독립적으로 제�
                   │                  │
          ┌────────▼────────┐  ┌──────▼──────────┐
          │  G1LocoBridge   │  │  G1ArmBridge    │
-         │  (Loco 제어)     │  │  (Arm 제어)      │
+         │  (Loco Control) │  │  (Arm Control)  │
          └────────┬────────┘  └──────┬──────────┘
                   │ ctypes           │ ctypes
          ┌────────▼────────┐  ┌──────▼──────────┐
@@ -73,51 +72,49 @@ Unitree G1 humanoid robot의 하체(loco)와 상체(arm)를 독립적으로 제�
                     └──────────────┘
 ```
 
-### 핵심 개념
+### Core Concepts
 
-#### ChannelFactory 싱글톤 패턴
-Unitree SDK의 **ChannelFactory**는 싱글톤으로 구현되어 있습니다:
-- `ChannelFactory::Instance()->Init()`는 **단 한 번만** 호출 가능
-- loco와 arm 클라이언트는 **같은 ChannelFactory 인스턴스를 공유**
-- **해결 방법**: loco wrapper에서만 초기화, arm wrapper는 기존 인스턴스 사용
+#### ChannelFactory Singleton Pattern
+The Unitree SDK's **ChannelFactory** is implemented as a singleton:
+- `ChannelFactory::Instance()->Init()` can only be called **once**
+- Loco and arm clients **share the same ChannelFactory instance**
+- **Solution**: Initialize only in loco wrapper, arm wrapper uses existing instance
 
-#### 통합 제어 흐름
-1. **Remote Client** → WebRTC로 조이스틱 입력 전송
-2. **AND** → pubsub으로 메시지 브로드캐스트
-3. **G1BaseController** → 조이스틱 매핑 및 라우팅
-4. **G1SubController** → loco_bridge/arm_bridge 호출
-5. **C++ Wrappers** → Unitree SDK 함수 실행
-6. **로봇** → DDS 통신으로 명령 수신 및 실행
+#### Integrated Control Flow
+1. **Remote Client** → Sends joystick input via WebRTC
+2. **AND** → Broadcasts messages via pubsub
+3. **G1BaseController** → Joystick mapping and routing
+4. **G1SubController** → Calls loco_bridge/arm_bridge
+5. **C++ Wrappers** → Executes Unitree SDK functions
+6. **Robot** → Receives and executes commands via DDS communication
 
 ---
 
-## 설치 방법
+## Installation
 
-### 1. 사전 요구사항
+### 1. Prerequisites
 
-- **OS**: Ubuntu 20.04 / 22.04 (ARM64 또는 x86_64)
-- **Python**: 3.8 이상
-- **CMake**: 3.10 이상
+- **OS**: Ubuntu 20.04 / 22.04 (ARM64 or x86_64)
+- **Python**: 3.8 or higher
+- **CMake**: 3.10 or higher
 - **Compiler**: g++ with C++17 support
-- **Unitree SDK2**: 공식 G1 SDK
+- **Unitree SDK2**: Official G1 SDK
 
-### 2. Unitree SDK2 설치
-
+### 2. Install Unitree SDK2
 ```bash
-# SDK 다운로드
+# Download SDK
 mkdir ~/dev
 cd ~/dev
 git clone https://github.com/unitreerobotics/unitree_sdk2.git
 
-# SDK 빌드
+# Build SDK
 cd unitree_sdk2
 mkdir build && cd build
 cmake ..
 make -j$(nproc)
 ```
 
-### 3. Python 의존성 설치
-
+### 3. Install Python Dependencies
 ```bash
 cd ~/dev
 git clone https://github.com/keti-ai/and_gerri.git # NEED ID and TOKEN
@@ -126,114 +123,110 @@ sudo chmod 777 install.sh
 bash install.sh
 ```
 
-### 4. 환경 변수 설정
-
+### 4. Set Environment Variables
 ```bash
-# .bashrc에 추가
+# Add to .bashrc
 export LD_LIBRARY_PATH=/home/tom2025orin006/dev/unitree_sdk2/lib/aarch64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/home/tom2025orin006/dev/unitree_sdk2/thirdparty/lib/aarch64:$LD_LIBRARY_PATH
 
-# 적용
+# Apply
 source ~/.bashrc
 ```
 
-### 5. C++ Wrapper 빌드
-
+### 5. Build C++ Wrappers
 ```bash
 cd cpp_wrapper
 mkdir build && cd build
 cmake ..
 make -j$(nproc)
 
-# 생성 확인
+# Verify creation
 ls -lh ../libg1_loco_wrapper.so  # 5.3 MB
 ls -lh ../libg1_arm_wrapper.so   # 5.2 MB
 ```
 
-자세한 빌드 방법은 [빌드 가이드](#-빌드-가이드) 참조
+For detailed build instructions, see [Build Guide](#-build-guide)
 
 ---
 
-## 파일 구조
-
+## File Structure
 ```
 unitree_g1/
-├── README.md                    # 이 통합 가이드
-├── g1_robot.py                  # 메인 진입점
-├── g1_config.py                 # 설정 파일
-├── g1_base_controller.py        # 상위 컨트롤러 (메시지 라우팅, 조이스틱 매핑)
-├── g1_sub_controller.py         # 하위 컨트롤러 (통합 loco + arm 제어)
-├── g1_loco_bridge.py            # Loco Python-C++ 브릿지
-├── g1_arm_bridge.py             # Arm Python-C++ 브릿지
+├── README.md                    # This integration guide
+├── g1_robot.py                  # Main entry point
+├── g1_config.py                 # Configuration file
+├── g1_base_controller.py        # Upper controller (message routing, joystick mapping)
+├── g1_sub_controller.py         # Sub controller (integrated loco + arm control)
+├── g1_loco_bridge.py            # Loco Python-C++ bridge
+├── g1_arm_bridge.py             # Arm Python-C++ bridge
 └── cpp_wrapper/
-    ├── CMakeLists.txt           # CMake 빌드 설정
-    ├── g1_loco_wrapper.h        # Loco C 인터페이스 헤더
-    ├── g1_loco_wrapper.cpp      # Loco C++ SDK 래퍼 구현
-    ├── libg1_loco_wrapper.so    # Loco 공유 라이브러리
-    ├── g1_arm_wrapper.h         # Arm C 인터페이스 헤더
-    ├── g1_arm_wrapper.cpp       # Arm C++ SDK 래퍼 구현
-    └── libg1_arm_wrapper.so     # Arm 공유 라이브러리
+    ├── CMakeLists.txt           # CMake build configuration
+    ├── g1_loco_wrapper.h        # Loco C interface header
+    ├── g1_loco_wrapper.cpp      # Loco C++ SDK wrapper implementation
+    ├── libg1_loco_wrapper.so    # Loco shared library
+    ├── g1_arm_wrapper.h         # Arm C interface header
+    ├── g1_arm_wrapper.cpp       # Arm C++ SDK wrapper implementation
+    └── libg1_arm_wrapper.so     # Arm shared library
 ```
 
-### 파일 설명
+### File Descriptions
 
-| 파일 | 역할 | 주요 기능 |
-|------|------|-----------|
-| `g1_robot.py` | 메인 프로그램 | AND/GERRI 초기화, 프로세스 유지 |
-| `g1_config.py` | 설정 관리 | 로봇 정보, 카메라, 오디오 설정 |
-| `g1_base_controller.py` | 메시지 처리 | 조이스틱 입력 매핑 (loco + arm), 메시지 라우팅 |
-| `g1_sub_controller.py` | 통합 로봇 제어 | 이동, 자세, 16개 arm actions 제어 API |
-| `g1_loco_bridge.py` | Loco 브릿지 | Python ctypes를 통한 loco C++ 호출 |
-| `g1_arm_bridge.py` | Arm 브릿지 | Python ctypes를 통한 arm C++ 호출 |
-| `g1_loco_wrapper.cpp` | Loco SDK 래퍼 | Unitree Loco SDK를 C 인터페이스로 래핑 |
-| `g1_arm_wrapper.cpp` | Arm SDK 래퍼 | Unitree Arm SDK를 C 인터페이스로 래핑 |
+| File | Role | Key Functions |
+|------|------|---------------|
+| `g1_robot.py` | Main program | AND/GERRI initialization, process management |
+| `g1_config.py` | Configuration management | Robot info, camera, audio settings |
+| `g1_base_controller.py` | Message processing | Joystick input mapping (loco + arm), message routing |
+| `g1_sub_controller.py` | Integrated robot control | Movement, posture, 16 arm actions control API |
+| `g1_loco_bridge.py` | Loco bridge | Loco C++ calls via Python ctypes |
+| `g1_arm_bridge.py` | Arm bridge | Arm C++ calls via Python ctypes |
+| `g1_loco_wrapper.cpp` | Loco SDK wrapper | Wraps Unitree Loco SDK with C interface |
+| `g1_arm_wrapper.cpp` | Arm SDK wrapper | Wraps Unitree Arm SDK with C interface |
 
 ---
 
-## 제어 기능
+## Control Features
 
-### Loco (하체) 조이스틱 매핑
+### Loco (Lower Body) Joystick Mapping
 
-| 입력 | 설명 | 함수 | 단축키 |
-|------|------|------|--------|
-| **axes[1] = -1** | 전진 | `move_forward()` | #w |
-| **axes[1] = 1** | 후진 | `move_backward()` | #s |
-| **axes[0] = -1** | 좌측 이동 | `move_left()` | #a |
-| **axes[0] = 1** | 우측 이동 | `move_right()` | #d |
-| **buttons[1]** | 우회전 | `turn_right()` | #e |
-| **buttons[2]** | 좌회전 | `turn_left()` | #q |
-| **buttons[3]** | 정지 | `stop()` | #r |
-| **buttons[0]** | 모션 활성화 | `enable_motion()` | #space |
-| **buttons[4]** | 앉기 | `sit_down()` | #z |
-| **buttons[5]** | 일어서기 | `stand_up()` | #c |
+| Input | Description | Function | Shortcut |
+|-------|-------------|----------|----------|
+| **axes[1] = -1** | Forward | `move_forward()` | #w |
+| **axes[1] = 1** | Backward | `move_backward()` | #s |
+| **axes[0] = -1** | Move left | `move_left()` | #a |
+| **axes[0] = 1** | Move right | `move_right()` | #d |
+| **buttons[1]** | Turn right | `turn_right()` | #e |
+| **buttons[2]** | Turn left | `turn_left()` | #q |
+| **buttons[3]** | Stop | `stop()` | #r |
+| **buttons[0]** | Enable motion | `enable_motion()` | #space |
+| **buttons[4]** | Sit down | `sit_down()` | #z |
+| **buttons[5]** | Stand up | `stand_up()` | #c |
 | **buttons[6]** | FSM ID 1 | `set_fsm_id(1)` | #1 |
 | **buttons[7]** | FSM ID 4 | `set_fsm_id(4)` | #3 |
 | **buttons[8]** | FSM ID 500 | `set_fsm_id(500)` | #6 |
 | **buttons[9]** | FSM ID 801 | `set_fsm_id(801)` | #7 |
 
-### Arm (상체) 조이스틱 매핑
+### Arm (Upper Body) Joystick Mapping
 
-#### 활성화된 매핑 (10개)
+#### Active Mappings (10)
 
-| 입력 | 설명 | 함수 | 단축키 |
-|------|------|------|--------|
-| **buttons[10]** | 손 흔들기 | `arm_wave()` | #h |
-| **buttons[11]** | 박수 | `arm_clap()` | #j |
-| **buttons[12]** | 하트 | `arm_heart()` | #k |
-| **buttons[13]** | 포옹 | `arm_hug()` | #l |
-| **buttons[14]** | 양손 들기 | `arm_hands_up()` | |
-| **buttons[15]** | 하이파이브 | `arm_high_five()` | |
-| **axes[2] = 1** | 거절 | `arm_reject()` | |
-| **axes[2] = -1** | 악수 | `arm_shake_hand()` | |
-| **axes[3] = 1** | 얼굴 앞 손 흔들기 | `arm_face_wave()` | |
-| **axes[3] = -1** | X-ray 포즈 | `arm_x_ray()` | |
+| Input | Description | Function | Shortcut |
+|-------|-------------|----------|----------|
+| **buttons[10]** | Wave | `arm_wave()` | #h |
+| **buttons[11]** | Clap | `arm_clap()` | #j |
+| **buttons[12]** | Heart | `arm_heart()` | #k |
+| **buttons[13]** | Hug | `arm_hug()` | #l |
+| **buttons[14]** | Hands up | `arm_hands_up()` | |
+| **buttons[15]** | High five | `arm_high_five()` | |
+| **axes[2] = 1** | Reject | `arm_reject()` | |
+| **axes[2] = -1** | Shake hand | `arm_shake_hand()` | |
+| **axes[3] = 1** | Face wave | `arm_face_wave()` | |
+| **axes[3] = -1** | X-ray pose | `arm_x_ray()` | |
 
-#### 코드 전용 매핑 (6개)
+#### Code-Only Mappings (6)
 
-주석으로 `g1_base_controller.py`에 문서화되어 있음:
-
+Documented as comments in `g1_base_controller.py`:
 ```python
-# ========== ARM 추가 액션 (코드로만 사용 가능) ==========
+# ========== ARM ADDITIONAL ACTIONS (Code only) ==========
 # ('buttons', 16, 1): ('Arm Two Hand Kiss', lambda: self.sub_controller.arm_two_hand_kiss()),
 # ('buttons', 17, 1): ('Arm Left Kiss', lambda: self.sub_controller.arm_left_kiss()),
 # ('buttons', 18, 1): ('Arm Right Kiss', lambda: self.sub_controller.arm_right_kiss()),
@@ -244,55 +237,53 @@ unitree_g1/
 
 ---
 
-## 🦾 Arm Actions 완전 가이드
+## Arm Actions Complete Guide
 
-### 전체 16개 Arm Actions 목록
+### Complete List of 16 Arm Actions
 
-| ID | Action Name | Method | 매핑 방법 | 설명 |
-|----|-------------|--------|----------|------|
-| 11 | two_hand_kiss | `arm_two_hand_kiss()` | 코드 | 양손 키스 |
-| 12 | left_kiss | `arm_left_kiss()` | 코드 | 왼손 키스 |
-| 13 | right_kiss | `arm_right_kiss()` | 코드 | 오른손 키스 |
-| 15 | hands_up | `arm_hands_up()` | buttons[14] | 양손 들기 |
-| 17 | clap | `arm_clap()` | buttons[11] | 박수 |
-| 18 | high_five | `arm_high_five()` | buttons[15] | 하이파이브 |
-| 19 | hug | `arm_hug()` | buttons[13] | 포옹 |
-| 20 | heart | `arm_heart()` | buttons[12] | 하트 |
-| 21 | right_heart | `arm_right_heart()` | 코드 | 오른손 하트 |
-| 22 | reject | `arm_reject()` | axes[2]=1 | 거절 |
-| 23 | right_hand_up | `arm_right_hand_up()` | 코드 | 오른손 들기 |
-| 24 | x_ray | `arm_x_ray()` | axes[3]=-1 | X-ray 포즈 |
-| 25 | face_wave | `arm_face_wave()` | axes[3]=1 | 얼굴 앞 손 흔들기 |
-| 26 | high_wave | `arm_wave()` | buttons[10] | 높이 손 흔들기 |
-| 27 | shake_hand | `arm_shake_hand()` | axes[2]=-1 | 악수 |
-| 99 | release_arm | `arm_release()` | 코드 | 팔 해제 |
+| ID | Action Name | Method | Mapping | Description |
+|----|-------------|--------|---------|-------------|
+| 11 | two_hand_kiss | `arm_two_hand_kiss()` | Code | Two-hand kiss |
+| 12 | left_kiss | `arm_left_kiss()` | Code | Left hand kiss |
+| 13 | right_kiss | `arm_right_kiss()` | Code | Right hand kiss |
+| 15 | hands_up | `arm_hands_up()` | buttons[14] | Both hands up |
+| 17 | clap | `arm_clap()` | buttons[11] | Clap |
+| 18 | high_five | `arm_high_five()` | buttons[15] | High five |
+| 19 | hug | `arm_hug()` | buttons[13] | Hug |
+| 20 | heart | `arm_heart()` | buttons[12] | Heart |
+| 21 | right_heart | `arm_right_heart()` | Code | Right hand heart |
+| 22 | reject | `arm_reject()` | axes[2]=1 | Reject |
+| 23 | right_hand_up | `arm_right_hand_up()` | Code | Right hand up |
+| 24 | x_ray | `arm_x_ray()` | axes[3]=-1 | X-ray pose |
+| 25 | face_wave | `arm_face_wave()` | axes[3]=1 | Wave in front of face |
+| 26 | high_wave | `arm_wave()` | buttons[10] | High wave |
+| 27 | shake_hand | `arm_shake_hand()` | axes[2]=-1 | Shake hand |
+| 99 | release_arm | `arm_release()` | Code | Release arm |
 
-### FSM 상태 요구사항
+### FSM State Requirements
 
-Arm action은 특정 FSM 상태에서만 동작합니다:
+Arm actions only work in specific FSM states:
 
-- **FSM 500** (권장 - 모든 모드 지원)
+- **FSM 500** (Recommended - supports all modes)
 - **FSM 501**
-- **FSM 801** (mode 0, 3에서만)
-
+- **FSM 801** (only in mode 0, 3)
 ```python
-# FSM 확인 및 설정
+# Check and set FSM
 code, fsm_id = controller.get_fsm_id()
 if fsm_id not in [500, 501, 801]:
     print(f"Current FSM: {fsm_id}")
     controller.set_fsm_id(500)
-    time.sleep(2)  # FSM 전환 대기
+    time.sleep(2)  # Wait for FSM transition
     print("FSM set to 500 - ready for arm actions")
 ```
 
 ---
 
-## 사용 방법
+## Usage
 
-### 1. 설정 파일 수정
+### 1. Modify Configuration File
 
-`g1_config.py`에서 로봇 정보와 카메라/오디오 설정을 수정하세요:
-
+Modify robot info and camera/audio settings in `g1_config.py`:
 ```python
 ROBOT_INFO = {
     "id": "unitree_g1",
@@ -310,79 +301,75 @@ AUDIO_INFO = {
 }
 ```
 
-### 2. 로봇 실행
-
+### 2. Run the Robot
 ```bash
-# 로봇이 연결된 환경에서 실행
+# Run in environment connected to robot
 python3 g1_robot.py
 ```
 
-### 3. 조이스틱으로 원격 제어
+### 3. Remote Control via Joystick
 
-웹 브라우저나 모바일 앱에서 로봇에 접속하여 제어:
-
+Connect to the robot via web browser or mobile app:
 ```bash
-# Loco 제어
-axes[1] = -1   # 전진
-axes[0] = -1   # 좌측 이동
-buttons[1]     # 우회전
-buttons[3]     # 정지
+# Loco control
+axes[1] = -1   # Forward
+axes[0] = -1   # Move left
+buttons[1]     # Turn right
+buttons[3]     # Stop
 
-# Arm 제어
-buttons[10]    # 손 흔들기
-buttons[11]    # 박수
-buttons[12]    # 하트
-axes[2] = 1    # 거절
+# Arm control
+buttons[10]    # Wave
+buttons[11]    # Clap
+buttons[12]    # Heart
+axes[2] = 1    # Reject
 ```
 
-### 4. 프로그래밍 API
+### 4. Programming API
 
-#### Loco (하체) 제어
-
+#### Loco (Lower Body) Control
 ```python
 from gerri.robot.examples.unitree_g1.g1_sub_controller import G1SubController
 
 controller = G1SubController()
 controller.connect()
 
-# 기본 이동
-controller.move_forward()      # 0.3 m/s 전진
-controller.move_backward()     # 0.3 m/s 후진
-controller.move_left()         # 좌측 이동
-controller.move_right()        # 우측 이동
-controller.turn_left()         # 0.5 rad/s 좌회전
-controller.turn_right()        # 0.5 rad/s 우회전
-controller.stop()              # 정지
+# Basic movement
+controller.move_forward()      # 0.3 m/s forward
+controller.move_backward()     # 0.3 m/s backward
+controller.move_left()         # Move left
+controller.move_right()        # Move right
+controller.turn_left()         # 0.5 rad/s turn left
+controller.turn_right()        # 0.5 rad/s turn right
+controller.stop()              # Stop
 
-# 자세 제어
-controller.enable_motion()     # 로봇 시작
-controller.stand_up()          # 일어서기
-controller.sit_down()          # 앉기
+# Posture control
+controller.enable_motion()     # Start robot
+controller.stand_up()          # Stand up
+controller.sit_down()          # Sit down
 
-# 직접 속도 설정
+# Direct velocity setting
 controller.set_velocity(vx, vy, omega, duration)
 
-# FSM 제어
+# FSM control
 controller.set_fsm_id(500)
 code, fsm_id = controller.get_fsm_id()
 ```
 
-#### Arm (상체) 제어
-
+#### Arm (Upper Body) Control
 ```python
-# 조이스틱 매핑된 동작 (10개)
-controller.arm_wave()           # buttons[10] - 손 흔들기
-controller.arm_clap()           # buttons[11] - 박수
-controller.arm_heart()          # buttons[12] - 하트
-controller.arm_hug()            # buttons[13] - 포옹
-controller.arm_hands_up()       # buttons[14] - 양손 들기
-controller.arm_high_five()      # buttons[15] - 하이파이브
-controller.arm_reject()         # axes[2]=1 - 거절
-controller.arm_shake_hand()     # axes[2]=-1 - 악수
-controller.arm_face_wave()      # axes[3]=1 - 얼굴 앞 손 흔들기
+# Joystick-mapped actions (10)
+controller.arm_wave()           # buttons[10] - Wave
+controller.arm_clap()           # buttons[11] - Clap
+controller.arm_heart()          # buttons[12] - Heart
+controller.arm_hug()            # buttons[13] - Hug
+controller.arm_hands_up()       # buttons[14] - Hands up
+controller.arm_high_five()      # buttons[15] - High five
+controller.arm_reject()         # axes[2]=1 - Reject
+controller.arm_shake_hand()     # axes[2]=-1 - Shake hand
+controller.arm_face_wave()      # axes[3]=1 - Face wave
 controller.arm_x_ray()          # axes[3]=-1 - X-ray
 
-# 코드 전용 동작 (6개)
+# Code-only actions (6)
 controller.arm_two_hand_kiss()
 controller.arm_left_kiss()
 controller.arm_right_kiss()
@@ -390,27 +377,26 @@ controller.arm_right_heart()
 controller.arm_right_hand_up()
 controller.arm_release()
 
-# 범용 메소드
+# Generic method
 controller.arm_action("high_wave")
 controller.arm_action("clap")
 ```
 
-#### 동시 제어 (Loco + Arm)
+#### Simultaneous Control (Loco + Arm)
 
-하체와 상체는 **독립적으로 동시 제어 가능**:
-
+Lower body and upper body can be **controlled independently and simultaneously**:
 ```python
-# 전진하면서 손 흔들기
+# Walk forward while waving
 controller.move_forward()
 time.sleep(0.5)
 controller.arm_wave()
 
-# 회전하면서 박수
+# Turn while clapping
 controller.turn_left()
 time.sleep(0.5)
 controller.arm_clap()
 
-# 걷으면서 하트 만들기
+# Walk while making heart
 controller.move_forward()
 time.sleep(1)
 controller.arm_heart()
@@ -418,24 +404,23 @@ time.sleep(3)
 controller.stop()
 ```
 
-### 5. 완전한 예제
-
+### 5. Complete Example
 ```python
 #!/usr/bin/env python3
 import time
 from gerri.robot.examples.unitree_g1.g1_sub_controller import G1SubController
 
-# 컨트롤러 생성 및 연결
+# Create and connect controller
 controller = G1SubController()
 controller.connect()
 
-# 1. 로봇 시작
+# 1. Start robot
 controller.enable_motion()
 time.sleep(2)
 controller.stand_up()
 time.sleep(3)
 
-# 2. FSM 상태 확인 및 설정
+# 2. Check and set FSM state
 code, fsm_id = controller.get_fsm_id()
 print(f"Current FSM ID: {fsm_id}")
 
@@ -444,7 +429,7 @@ if fsm_id not in [500, 501, 801]:
     controller.set_fsm_id(500)
     time.sleep(2)
 
-# 3. 전진하면서 손 흔들기
+# 3. Move forward and wave
 print("Moving forward and waving...")
 controller.move_forward()
 time.sleep(1)
@@ -452,12 +437,12 @@ controller.arm_wave()
 time.sleep(3)
 controller.stop()
 
-# 4. 박수 치기
+# 4. Clap
 print("Clapping...")
 controller.arm_clap()
 time.sleep(3)
 
-# 5. 회전하면서 하트 만들기
+# 5. Turn and make heart
 print("Turning and making heart...")
 controller.turn_left()
 time.sleep(1)
@@ -465,32 +450,30 @@ controller.arm_heart()
 time.sleep(3)
 controller.stop()
 
-# 6. 포옹 자세
+# 6. Hug pose
 print("Hugging...")
 controller.arm_hug()
 time.sleep(3)
 
-# 7. 연결 해제
+# 7. Disconnect
 controller.disconnect()
 print("Done!")
 ```
 
 ---
 
-## 빌드 가이드
+## Build Guide
 
-### C++ Wrapper 빌드
+### Building C++ Wrappers
 
-#### 방법 1: 빠른 재빌드
-
+#### Method 1: Quick Rebuild
 ```bash
 cd cpp_wrapper/build
 make clean
 make -j$(nproc)
 ```
 
-#### 방법 2: 클린 빌드
-
+#### Method 2: Clean Build
 ```bash
 cd cpp_wrapper
 rm -rf build
@@ -499,34 +482,31 @@ cmake ..
 make -j$(nproc)
 ```
 
-### CMake 설정 수정
+### Modify CMake Configuration
 
-`cpp_wrapper/CMakeLists.txt`에서 SDK 경로 확인:
-
+Verify SDK path in `cpp_wrapper/CMakeLists.txt`:
 ```cmake
 set(UNITREE_SDK_PATH "/home/tom2025orin006/dev/unitree_sdk2")
 ```
 
-실제 SDK 경로에 맞게 수정하세요.
+Modify to match your actual SDK path.
 
-### 빌드 확인
-
+### Verify Build
 ```bash
-# 라이브러리 생성 확인
+# Verify library creation
 ls -lh cpp_wrapper/libg1_loco_wrapper.so  # 5.3 MB
 ls -lh cpp_wrapper/libg1_arm_wrapper.so   # 5.2 MB
 
-# 의존성 확인
+# Check dependencies
 ldd cpp_wrapper/libg1_loco_wrapper.so
 ldd cpp_wrapper/libg1_arm_wrapper.so
 
-# Python에서 로드 테스트
+# Test loading in Python
 python3 -c "import ctypes; lib = ctypes.CDLL('./cpp_wrapper/libg1_loco_wrapper.so'); print('Loco OK')"
 python3 -c "import ctypes; lib = ctypes.CDLL('./cpp_wrapper/libg1_arm_wrapper.so'); print('Arm OK')"
 ```
 
-### 빌드 출력 예시
-
+### Example Build Output
 ```
 Scanning dependencies of target g1_loco_wrapper
 [ 33%] Building CXX object CMakeFiles/g1_loco_wrapper.dir/g1_loco_wrapper.cpp.o
@@ -544,221 +524,219 @@ Scanning dependencies of target g1_arm_wrapper
 
 ---
 
-## 문제 해결
+## Troubleshooting
 
-### 1. 라이브러리를 찾을 수 없음
+### 1. Library Not Found
 
-**증상**:
+**Symptom**:
 ```
 ImportError: libunitree_sdk2.so: cannot open shared object file
 ```
 
-**해결**:
+**Solution**:
 ```bash
 export LD_LIBRARY_PATH=/home/tom2025orin006/dev/unitree_sdk2/lib/aarch64:$LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/home/tom2025orin006/dev/unitree_sdk2/thirdparty/lib/aarch64:$LD_LIBRARY_PATH
 
-# .bashrc에 영구 추가
+# Add permanently to .bashrc
 echo 'export LD_LIBRARY_PATH=/home/tom2025orin006/dev/unitree_sdk2/lib/aarch64:$LD_LIBRARY_PATH' >> ~/.bashrc
 echo 'export LD_LIBRARY_PATH=/home/tom2025orin006/dev/unitree_sdk2/thirdparty/lib/aarch64:$LD_LIBRARY_PATH' >> ~/.bashrc
 source ~/.bashrc
 ```
 
-### 2. ChannelFactory already initialized 에러
+### 2. ChannelFactory Already Initialized Error
 
-**증상**:
+**Symptom**:
 ```
 [ERROR] ChannelFactory already initialized
 ```
 
-**원인**: arm wrapper에서 ChannelFactory를 다시 초기화하려고 시도
+**Cause**: Arm wrapper attempting to reinitialize ChannelFactory
 
-**해결**: `g1_arm_wrapper.cpp`에서 `ChannelFactory::Init()` 제거 (이미 적용됨)
+**Solution**: Remove `ChannelFactory::Init()` from `g1_arm_wrapper.cpp` (already applied)
 
-### 3. CMake SDK를 찾을 수 없음
+### 3. CMake Cannot Find SDK
 
-**증상**:
+**Symptom**:
 ```
 CMake Error: Could not find unitree SDK headers
 ```
 
-**해결**:
-`CMakeLists.txt`에서 SDK 경로를 실제 경로로 수정:
+**Solution**:
+Modify SDK path in `CMakeLists.txt` to actual path:
 ```cmake
 set(UNITREE_SDK_PATH "/your/actual/path/to/unitree_sdk2")
 ```
 
-### 4. 로봇 연결 실패
+### 4. Robot Connection Failed
 
-**증상**:
+**Symptom**:
 ```
 [ERROR] Connection failed: Failed to create loco client
 ```
 
-**확인사항**:
-1. 로봇 전원이 켜져 있는지 확인
-2. 네트워크 인터페이스 확인 (`ip link` 또는 `ifconfig`)
-3. `g1_sub_controller.py`에서 네트워크 인터페이스 수정:
-   ```python
-   # __init__ 메소드에서
-   network_interface = "eth0"  # 실제 인터페이스로 변경
-   ```
+**Checklist**:
+1. Verify robot power is on
+2. Check network interface (`ip link` or `ifconfig`)
+3. Modify network interface in `g1_sub_controller.py`:
+```python
+   # In __init__ method
+   network_interface = "eth0"  # Change to actual interface
+```
 
-### 5. Arm action이 실행되지 않음
+### 5. Arm Action Not Executing
 
-**확인사항**:
+**Checklist**:
 
-1. **FSM 상태 확인**:
-   ```python
+1. **Check FSM state**:
+```python
    code, fsm_id = controller.get_fsm_id()
    print(f"Current FSM ID: {fsm_id}")
 
    if fsm_id not in [500, 501, 801]:
        controller.set_fsm_id(500)
        time.sleep(2)
-   ```
+```
 
-2. **로봇이 서있는지 확인**:
-   ```python
+2. **Verify robot is standing**:
+```python
    controller.stand_up()
    time.sleep(3)
-   ```
+```
 
-3. **에러 코드 확인**:
-   - `-5`: Arm SDK 오류
-   - `-6`: 로봇이 무언가를 잡고 있음
-   - `-7`: 잘못된 action ID
-   - `-8`: 잘못된 FSM 상태
+3. **Check error codes**:
+   - `-5`: Arm SDK error
+   - `-6`: Robot is holding something
+   - `-7`: Invalid action ID
+   - `-8`: Invalid FSM state
 
-4. **디버깅**:
-   ```python
+4. **Debugging**:
+```python
    success, msg = controller.arm_bridge.execute_action_by_name("high_wave")
    if not success:
        print(f"Failed: {msg}")
-   ```
+```
 
-### 6. libg1_arm_wrapper.so를 찾을 수 없음
+### 6. libg1_arm_wrapper.so Not Found
 
-**해결**:
+**Solution**:
 ```bash
 cd cpp_wrapper/build
 cmake ..
 make -j$(nproc)
-ls ../libg1_arm_wrapper.so  # 생성 확인
+ls ../libg1_arm_wrapper.so  # Verify creation
 ```
 
-### 7. 컴파일 에러
+### 7. Compilation Errors
 
-**C++17 지원 에러**:
+**C++17 support error**:
 ```bash
-# g++ 버전 확인
-g++ --version  # 7.0 이상 필요
+# Check g++ version
+g++ --version  # Requires 7.0 or higher
 
-# 업그레이드
+# Upgrade
 sudo apt update
 sudo apt install g++-9
 ```
 
-### 8. DDS 라이브러리 에러
+### 8. DDS Library Error
 
-**증상**:
+**Symptom**:
 ```
 CMake Error: Could not find DDS libraries
 ```
 
-**해결**:
-아키텍처 확인 후 경로 수정:
+**Solution**:
+Check architecture and modify path:
 ```bash
-# 아키텍처 확인
+# Check architecture
 uname -m
 # x86_64 → lib/x86_64
 # aarch64 → lib/aarch64
 ```
 
-`CMakeLists.txt`에서 아키텍처에 맞게 수정:
+Modify `CMakeLists.txt` for your architecture:
 ```cmake
-set(ARCH "aarch64")  # 또는 "x86_64"
+set(ARCH "aarch64")  # or "x86_64"
 ```
 
-### 9. 로봇이 명령에 반응하지 않음
+### 9. Robot Not Responding to Commands
 
-**확인사항**:
+**Checklist**:
 
-1. **FSM 상태 확인**:
-   ```python
+1. **Check FSM state**:
+```python
    code, fsm_id = controller.get_fsm_id()
    print(f"Current FSM ID: {fsm_id}")
-   ```
+```
 
-2. **로봇 활성화**:
-   ```python
+2. **Activate robot**:
+```python
    controller.enable_motion()
    time.sleep(2)
    controller.stand_up()
    time.sleep(3)
-   ```
+```
 
-3. **리턴 코드 확인**:
-   - `0`: 성공
-   - `3104`: 로봇 준비되지 않음
-   - `-1`: 일반 에러
+3. **Check return codes**:
+   - `0`: Success
+   - `3104`: Robot not ready
+   - `-1`: General error
 
-### 10. 초기화 순서 문제
+### 10. Initialization Order Issues
 
-**중요**: 반드시 **loco → arm** 순서로 초기화:
-
+**Important**: Always initialize in **loco → arm** order:
 ```python
-# 올바른 순서
+# Correct order
 self.loco_bridge = G1LocoBridge("eth0")
-self.loco_bridge.connect()  # ChannelFactory 초기화
+self.loco_bridge.connect()  # Initializes ChannelFactory
 
 self.arm_bridge = G1ArmBridge("eth0")
-self.arm_bridge.connect()   # 기존 ChannelFactory 사용
+self.arm_bridge.connect()   # Uses existing ChannelFactory
 
-# 잘못된 순서
+# Wrong order
 self.arm_bridge = G1ArmBridge("eth0")
-self.arm_bridge.connect()   # ChannelFactory 초기화 안 됨!
+self.arm_bridge.connect()   # ChannelFactory not initialized!
 
 self.loco_bridge = G1LocoBridge("eth0")
-self.loco_bridge.connect()  # 에러 발생 가능
+self.loco_bridge.connect()  # May cause error
 ```
 
 ---
 
-## 참고 자료
+## References
 
-### 공식 문서
-- [Unitree SDK2 공식 문서](https://github.com/unitreerobotics/unitree_sdk2)
-- [Unitree G1 사용자 매뉴얼](https://www.unitree.com/g1)
-- [DDS 통신 프로토콜](https://www.dds-foundation.org/)
+### Official Documentation
+- [Unitree SDK2 Official Documentation](https://github.com/unitreerobotics/unitree_sdk2)
+- [Unitree G1 User Manual](https://www.unitree.com/g1)
+- [DDS Communication Protocol](https://www.dds-foundation.org/)
 
-### 주요 개념
-- **ChannelFactory 싱글톤**: Unitree SDK의 핵심 통신 관리자
-- **FSM (Finite State Machine)**: 로봇 상태 관리 시스템
-- **DDS (Data Distribution Service)**: 로봇 통신 프로토콜
-- **WebRTC**: 실시간 원격 제어 통신
-- **pypubsub**: Python publish-subscribe 메시징
+### Key Concepts
+- **ChannelFactory Singleton**: Core communication manager of Unitree SDK
+- **FSM (Finite State Machine)**: Robot state management system
+- **DDS (Data Distribution Service)**: Robot communication protocol
+- **WebRTC**: Real-time remote control communication
+- **pypubsub**: Python publish-subscribe messaging
 
-### 프로젝트 구조
-- **AND (Adaptive Network Daemon)**: WebRTC 기반 네트워크 계층
-- **GERRI**: 로봇 제어 시스템
-- **ctypes**: Python-C++ 인터페이스
-- **CMake**: C++ 빌드 시스템
+### Project Structure
+- **AND (Adaptive Network Daemon)**: WebRTC-based network layer
+- **GERRI**: Robot control system
+- **ctypes**: Python-C++ interface
+- **CMake**: C++ build system
 
 ---
 
-## 통합 완료 요약
+## Integration Summary
 
-### 구현된 기능
+### Implemented Features
 
-| 구분 | 항목 | 상태 |
-|------|------|------|
-| **Loco 제어** | 이동, 회전, 정지 | ✅ |
-| **Loco 자세** | 앉기, 서기, FSM 제어 | ✅ |
-| **Arm Actions** | 16개 전체 구현 | ✅ |
-| **조이스틱 Arm** | 10개 매핑 (buttons 6 + axes 4) | ✅ |
-| **코드 Arm** | 6개 추가 메소드 | ✅ |
-| **C++ Wrappers** | loco + arm 빌드 완료 | ✅ |
-| **ChannelFactory** | 싱글톤 충돌 해결 | ✅ |
-| **동시 제어** | loco + arm 독립 제어 | ✅ |
-
+| Category | Item | Status |
+|----------|------|--------|
+| **Loco Control** | Movement, rotation, stop | ✅ |
+| **Loco Posture** | Sit, stand, FSM control | ✅ |
+| **Arm Actions** | All 16 implemented | ✅ |
+| **Joystick Arm** | 10 mapped (6 buttons + 4 axes) | ✅ |
+| **Code Arm** | 6 additional methods | ✅ |
+| **C++ Wrappers** | Loco + arm build complete | ✅ |
+| **ChannelFactory** | Singleton conflict resolved | ✅ |
+| **Simultaneous Control** | Independent loco + arm control | ✅ |
